@@ -2,8 +2,11 @@ name: Daily Antam Puppeteer Scrape
 
 on:
   schedule:
-    - cron: "0 2 * * *"   # 02:00 UTC = 09:00 WIB
-  workflow_dispatch:      # bisa run manual
+    - cron: "0 2 * * *"   # 09:00 WIB
+  workflow_dispatch:
+
+permissions:
+  contents: write   # penting biar bisa git push
 
 jobs:
   scrape:
