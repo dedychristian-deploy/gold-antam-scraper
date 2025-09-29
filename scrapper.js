@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
+const path = require('path');
 const dayjs = require('dayjs');
 
 puppeteer.use(StealthPlugin());
@@ -18,7 +19,7 @@ puppeteer.use(StealthPlugin());
   const token = await page.$eval('input[name="_token"]', el => el.value);
   console.log('✅ Token ditemukan:', token);
 
-  // WIB (UTC+7) → aman di server UTC
+  // WIB (UTC+7)
   const transitionDate = dayjs().add(7, 'hour').format('YYYY-MM-DD');
   const url = `https://www.logammulia.com/data-base-price/gold_eai/sell?_token=${token}&transition=1&transition_date=${transitionDate}`;
   console.log('🔗 URL API:', url);
@@ -37,9 +38,22 @@ puppeteer.use(StealthPlugin());
 
   try {
     const json = JSON.parse(resultText);
-    const filename = `data/gold-${transitionDate}.json`;
+
+    // pastikan folder data ada
+    const outDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirSync(outDir, { recursive: true });
+    }
+
+    // simpan versi harian
+    const filename = path.join(outDir, `gold-${transitionDate}.json`);
     fs.writeFileSync(filename, JSON.stringify(json, null, 2));
-    console.log(`💾 Disimpan ke ${filename}`);
+
+    // simpan versi latest
+    const latest = path.join(outDir, 'gold-latest.json');
+    fs.writeFileSync(latest, JSON.stringify(json, null, 2));
+
+    console.log(`💾 Disimpan ke ${filename} dan gold-latest.json`);
   } catch (e) {
     console.error('❌ Gagal parse:', e.message);
     console.log('📄 Cuplikan isi:', resultText.slice(0, 300));
