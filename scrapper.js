@@ -45,15 +45,40 @@ puppeteer.use(StealthPlugin());
       fs.mkdirSync(outDir, { recursive: true });
     }
 
-    // simpan versi harian
+    // baca data lama dari gold-latest.json
+    const latestFile = path.join(outDir, 'gold-latest.json');
+    let existing = [];
+    if (fs.existsSync(latestFile)) {
+      try {
+        existing = JSON.parse(fs.readFileSync(latestFile, 'utf-8'));
+      } catch (e) {
+        console.warn("⚠️ Gagal baca gold-latest.json:", e.message);
+      }
+    }
+
+    // gabung data lama + baru
+    const combined = [...existing, ...json];
+
+    // buang duplikat berdasarkan YYYY-MM-DD + harga
+    const seen = new Set();
+    const filtered = combined.filter(([ts, price]) => {
+      const key = `${dayjs(ts).format('YYYY-MM-DD')}-${price}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    // urutkan berdasarkan timestamp
+    filtered.sort((a, b) => a[0] - b[0]);
+
+    // simpan arsip harian
     const filename = path.join(outDir, `gold-${transitionDate}.json`);
-    fs.writeFileSync(filename, JSON.stringify(json, null, 2));
+    fs.writeFileSync(filename, JSON.stringify(filtered, null, 2));
 
     // simpan versi latest
-    const latest = path.join(outDir, 'gold-latest.json');
-    fs.writeFileSync(latest, JSON.stringify(json, null, 2));
+    fs.writeFileSync(latestFile, JSON.stringify(filtered, null, 2));
 
-    console.log(`💾 Disimpan ke ${filename} dan gold-latest.json`);
+    console.log(`💾 Disimpan ke ${filename} dan gold-latest.json (total ${filtered.length} data)`);
   } catch (e) {
     console.error('❌ Gagal parse:', e.message);
     console.log('📄 Cuplikan isi:', resultText.slice(0, 300));
