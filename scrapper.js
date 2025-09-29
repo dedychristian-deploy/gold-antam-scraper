@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const fs = require('fs');
-const path = require('path');
 const dayjs = require('dayjs');
 
 puppeteer.use(StealthPlugin());
@@ -13,17 +12,18 @@ puppeteer.use(StealthPlugin());
   });
 
   const page = await browser.newPage();
-  await page.goto('https://www.logammulia.com/id', { waitUntil: 'networkidle2', timeout: 60000 });
+  await page.goto('https://www.logammulia.com/id', { waitUntil: 'networkidle2', timeout: 0 });
   await page.waitForSelector('input[name="_token"]');
 
   const token = await page.$eval('input[name="_token"]', el => el.value);
   console.log('✅ Token ditemukan:', token);
 
-  const transitionDate = dayjs().format('YYYY-MM-DD');
+  // WIB (UTC+7) → aman di server UTC
+  const transitionDate = dayjs().add(7, 'hour').format('YYYY-MM-DD');
   const url = `https://www.logammulia.com/data-base-price/gold_eai/sell?_token=${token}&transition=1&transition_date=${transitionDate}`;
   console.log('🔗 URL API:', url);
 
-  await new Promise(resolve => setTimeout(resolve, 5000)); // delay aman
+  await new Promise(resolve => setTimeout(resolve, 10000)); // delay aman
 
   const resultText = await page.evaluate(async (_url) => {
     const res = await fetch(_url, {
@@ -37,18 +37,9 @@ puppeteer.use(StealthPlugin());
 
   try {
     const json = JSON.parse(resultText);
-
-    // pastikan folder data ada
-    const outDir = path.join(__dirname, 'data');
-    if (!fs.existsSync(outDir)) {
-      fs.mkdirSync(outDir, { recursive: true });
-    }
-
-    const filename = path.join(outDir, `gold-${transitionDate}.json`);
+    const filename = `data/gold-${transitionDate}.json`;
     fs.writeFileSync(filename, JSON.stringify(json, null, 2));
-    fs.writeFileSync(path.join(outDir, 'gold-latest.json'), JSON.stringify(json, null, 2));
-
-    console.log(`💾 Disimpan ke ${filename} dan gold-latest.json`);
+    console.log(`💾 Disimpan ke ${filename}`);
   } catch (e) {
     console.error('❌ Gagal parse:', e.message);
     console.log('📄 Cuplikan isi:', resultText.slice(0, 300));
