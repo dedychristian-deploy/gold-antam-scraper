@@ -36,7 +36,7 @@ jobs:
 
       - name: Kirim Telegram Notif
         run: |
-          curl -s -X POST https://api.telegram.org/bot${{ secrets.8342432038:AAEk6bQmIzUQJpR2DxCC--t-z1g3dHPkUpo }}/sendMessage \
-          -d chat_id=${{ secrets.7643732899 }} \
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage \
+          -d chat_id=${{ secrets.TG_CHAT_ID }} \
           -d text="✅ Gold Scraper sukses update $(date +'%Y-%m-%d %H:%M:%S WIB')%0A🔗 https://raw.githubusercontent.com/dedychristian-deploy/gold-antam-scraper/main/data/gold-latest.json"
 
