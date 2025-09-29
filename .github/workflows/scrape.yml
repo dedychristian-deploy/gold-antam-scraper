@@ -33,3 +33,10 @@ jobs:
           git add data/
           git commit -m "Update gold data $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
           git push
+
+      - name: Kirim Telegram Notif
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.8342432038:AAEk6bQmIzUQJpR2DxCC--t-z1g3dHPkUpo }}/sendMessage \
+          -d chat_id=${{ secrets.7643732899 }} \
+          -d text="✅ Gold Scraper sukses update $(date +'%Y-%m-%d %H:%M:%S WIB')%0A🔗 https://raw.githubusercontent.com/dedychristian-deploy/gold-antam-scraper/main/data/gold-latest.json"
+
