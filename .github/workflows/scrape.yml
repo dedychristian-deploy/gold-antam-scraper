@@ -39,7 +39,7 @@ jobs:
          sudo apt-get update -y && sudo apt-get install -y jq
          PRICE=$(jq -r '.[-1][1]' data/gold-latest.json)
          TS=$(jq -r '.[-1][0]' data/gold-latest.json)
-         DATE_WIB=$(date -d "@$((TS/1000))" +'%Y-%m-%d %H:%M:%S WIB')
+         DATE_WIB=$(date -d "@$((TS/1000)) +7 hours" +'%Y-%m-%d %H:%M:%S WIB')
          curl -s -X POST "https://api.telegram.org/bot${{ secrets.TG_BOT_TOKEN }}/sendMessage" \
          -d chat_id="${{ secrets.TG_CHAT_ID }}" \
          -d text="✅ Gold Scraper sukses update%0A📅 $DATE_WIB%0A💰 Jual: Rp $PRICE%0A🔗 $RAW_URL"
