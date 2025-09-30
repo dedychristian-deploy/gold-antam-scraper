@@ -35,6 +35,8 @@ jobs:
           git push
           
       - name: Kirim Telegram Notif
+        env:
+         RAW_URL: https://raw.githubusercontent.com/dedychristian-deploy/gold-antam-scraper/main/data/gold-latest.json 
         run: |
          sudo apt-get update -y && sudo apt-get install -y jq
          PRICE=$(jq -r '.[-1][1]' data/gold-latest.json)
